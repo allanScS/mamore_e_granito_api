@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using MarmoreGranito.API.Models;
+using MarmoreGranito.API.Services;
 using Microsoft.EntityFrameworkCore;
 
 namespace MarmoreGranito.API.Data
@@ -18,7 +19,7 @@ namespace MarmoreGranito.API.Data
                     Nome = "Administrador",
                     Email = "admin@admin.com",
                     CPF = "000.000.000-00",
-                    Senha = BCrypt.Net.BCrypt.HashPassword("admin"),
+                    Senha = PasswordHashService.HashPassword("admin123#"),
                     Cargo = "Administrador",
                     DataCadastro = DateTime.UtcNow,
                     Ativo = true
