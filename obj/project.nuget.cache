@@ -1,9 +1,10 @@
 {
   "version": 2,
-  "dgSpecHash": "PQqlqL3IGnU=",
+  "dgSpecHash": "ju4Gz73WwfA=",
   "success": true,
-  "projectFilePath": "C:\\Users\\allan scherrer\\Downloads\\projeto\\MarmoreGranito.API\\MarmoreGranito.API.csproj",
+  "projectFilePath": "D:\\Pessoal\\Projetos\\mamore_e_granito_api\\MarmoreGranito.API.csproj",
   "expectedPackageFiles": [
+    "C:\\Users\\allan scherrer\\.nuget\\packages\\bcrypt.net-next\\4.0.3\\bcrypt.net-next.4.0.3.nupkg.sha512",
     "C:\\Users\\allan scherrer\\.nuget\\packages\\humanizer.core\\2.14.1\\humanizer.core.2.14.1.nupkg.sha512",
     "C:\\Users\\allan scherrer\\.nuget\\packages\\microsoft.aspnetcore.authentication.jwtbearer\\8.0.0\\microsoft.aspnetcore.authentication.jwtbearer.8.0.0.nupkg.sha512",
     "C:\\Users\\allan scherrer\\.nuget\\packages\\microsoft.aspnetcore.openapi\\8.0.0\\microsoft.aspnetcore.openapi.8.0.0.nupkg.sha512",

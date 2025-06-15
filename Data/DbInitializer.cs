@@ -1,7 +1,7 @@
 using System;
 using System.Linq;
 using MarmoreGranito.API.Models;
-using MarmoreGranito.API.Services;
+using Microsoft.EntityFrameworkCore;
 
 namespace MarmoreGranito.API.Data
 {
@@ -9,35 +9,24 @@ namespace MarmoreGranito.API.Data
     {
         public static void Initialize(ApplicationDbContext context)
         {
-            context.Database.EnsureCreated();
+            context.Database.Migrate();
 
-            // Verificar se já existem usuários
-            if (context.Usuarios.Any())
+            if (!context.Usuarios.Any())
             {
-                // Atualizar a senha do admin se necessário
-                var admin = context.Usuarios.FirstOrDefault(u => u.Email == "admin@admin.com");
-                if (admin != null && !PasswordHashService.VerifyPassword("admin123#", admin.Senha))
+                var adminUser = new Usuario
                 {
-                    admin.Senha = PasswordHashService.HashPassword("admin123#");
-                    context.SaveChanges();
-                }
-                return;
+                    Nome = "Administrador",
+                    Email = "admin@admin.com",
+                    CPF = "000.000.000-00",
+                    Senha = BCrypt.Net.BCrypt.HashPassword("admin"),
+                    Cargo = "Administrador",
+                    DataCadastro = DateTime.UtcNow,
+                    Ativo = true
+                };
+
+                context.Usuarios.Add(adminUser);
+                context.SaveChanges();
             }
-
-            // Criar usuário administrador
-            var novoAdmin = new Usuario
-            {
-                Nome = "Administrador",
-                Email = "admin@admin.com",
-                CPF = "000.000.000-00",
-                Senha = PasswordHashService.HashPassword("admin123#"),
-                DataCriacao = DateTime.UtcNow,
-                DataUltimaAtualizacao = DateTime.UtcNow,
-                Ativo = true
-            };
-
-            context.Usuarios.Add(novoAdmin);
-            context.SaveChanges();
         }
     }
 } 

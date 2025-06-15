@@ -6,6 +6,7 @@ using Microsoft.IdentityModel.Tokens;
 using MarmoreGranito.API.Data;
 using MarmoreGranito.API.Services;
 using Microsoft.OpenApi.Models;
+using MarmoreGranito.API.Configurations;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -13,8 +14,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 
 // Configuração do banco de dados
-builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseNpgsql("Host=localhost;Port=5432;Database=marmore_granito;Username=postgres;Password=T3l3ss4ud3"));
+builder.Services.AddDatabaseConfiguration(builder.Configuration);
 
 // Configuração do JWT
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -46,16 +46,10 @@ builder.Services.AddCors(options =>
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
-    c.SwaggerDoc("v1", new OpenApiInfo { 
-        Title = "Marmore Granito API", 
-        Version = "v1",
-        Description = "API para gerenciamento do sistema Marmore Granito"
-    });
-
-    // Configuração do JWT no Swagger
+    c.SwaggerDoc("v1", new OpenApiInfo { Title = "Marmore e Granito API", Version = "v1" });
     c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
-        Description = "JWT Authorization header using the Bearer scheme. Example: 'Bearer {token}'",
+        Description = "JWT Authorization header using the Bearer scheme. Example: \"Authorization: Bearer {token}\"",
         Name = "Authorization",
         In = ParameterLocation.Header,
         Type = SecuritySchemeType.ApiKey,
@@ -89,11 +83,7 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-    app.UseSwaggerUI(c =>
-    {
-        c.SwaggerEndpoint("/swagger/v1/swagger.json", "Marmore Granito API v1");
-        c.RoutePrefix = "swagger";
-    });
+    app.UseSwaggerUI();
 }
 
 // Middleware de logging global para erros de API
@@ -111,29 +101,14 @@ app.Use(async (context, next) =>
     }
 });
 
-// Comentando a redireção HTTPS para desenvolvimento local
-// app.UseHttpsRedirection();
-
+app.UseHttpsRedirection();
 app.UseCors("AllowAll");
 app.UseAuthentication();
 app.UseAuthorization();
+
 app.MapControllers();
 
-// Criar/atualizar o banco de dados e inserir dados iniciais
-using (var scope = app.Services.CreateScope())
-{
-    var services = scope.ServiceProvider;
-    try
-    {
-        var context = services.GetRequiredService<ApplicationDbContext>();
-        context.Database.Migrate();
-        DbInitializer.Initialize(context);
-    }
-    catch (Exception ex)
-    {
-        var logger = services.GetRequiredService<ILogger<Program>>();
-        logger.LogError(ex, "Ocorreu um erro ao criar/atualizar o banco de dados.");
-    }
-}
+// Configuração e inicialização do banco de dados
+app.UseDatabaseConfiguration();
 
 app.Run(); 

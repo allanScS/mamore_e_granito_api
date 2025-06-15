@@ -35,10 +35,10 @@ namespace MarmoreGranito.API.Controllers
         {
             try
             {
-                _logger.LogInformation("Buscando usuários com filtros - Nome: {Nome}, Email: {Email}, Cargo: {Cargo}, CPF: {CPF}",
+                _logger.LogInformation("Buscando usuários ativos com filtros - Nome: {Nome}, Email: {Email}, Cargo: {Cargo}, CPF: {CPF}",
                     nome ?? "null", email ?? "null", cargo ?? "null", cpf ?? "null");
 
-                var query = _context.Usuarios.AsQueryable();
+                var query = _context.Usuarios.Where(u => u.Ativo); // Filtra apenas usuários ativos
 
                 if (!string.IsNullOrEmpty(nome))
                     query = query.Where(u => u.Nome.ToLower().Contains(nome.ToLower()));
@@ -61,13 +61,13 @@ namespace MarmoreGranito.API.Controllers
                         CPF = u.CPF,
                         Cargo = u.Cargo,
                         Telefone = u.Telefone,
-                        DataCriacao = u.DataCriacao,
+                        DataCadastro = u.DataCadastro,
                         DataUltimaAtualizacao = u.DataUltimaAtualizacao,
                         Ativo = u.Ativo
                     })
                     .ToListAsync();
 
-                _logger.LogInformation("Usuários encontrados: {Count}", usuarios.Count);
+                _logger.LogInformation("Usuários ativos encontrados: {Count}", usuarios.Count);
                 return usuarios;
             }
             catch (Exception ex)
@@ -84,11 +84,13 @@ namespace MarmoreGranito.API.Controllers
             {
                 _logger.LogInformation("Buscando usuário com ID: {Id}", id);
 
-                var usuario = await _context.Usuarios.FindAsync(id);
+                var usuario = await _context.Usuarios
+                    .Where(u => u.Ativo) // Filtra apenas usuários ativos
+                    .FirstOrDefaultAsync(u => u.Id == id);
 
                 if (usuario == null)
                 {
-                    _logger.LogWarning("Usuário não encontrado com ID: {Id}", id);
+                    _logger.LogWarning("Usuário não encontrado ou inativo com ID: {Id}", id);
                     return NotFound(new { message = "Usuário não encontrado" });
                 }
 
@@ -111,10 +113,21 @@ namespace MarmoreGranito.API.Controllers
             {
                 _logger.LogInformation("Criando novo usuário com email: {Email}", model.Email);
 
-                if (await _context.Usuarios.AnyAsync(u => u.Email == model.Email))
+                // Verifica se existe um usuário ativo com o mesmo email
+                var usuarioExistente = await _context.Usuarios
+                    .FirstOrDefaultAsync(u => u.Email == model.Email);
+
+                if (usuarioExistente != null)
                 {
-                    _logger.LogWarning("Tentativa de criar usuário com email já existente: {Email}", model.Email);
-                    return BadRequest(new { message = "E-mail já cadastrado" });
+                    if (usuarioExistente.Ativo)
+                    {
+                        _logger.LogWarning("Tentativa de criar usuário com email já existente e ativo: {Email}", model.Email);
+                        return BadRequest(new { message = "E-mail já cadastrado para um usuário ativo" });
+                    }
+                    else
+                    {
+                        _logger.LogInformation("Email {Email} encontrado para usuário inativo. Permitindo novo cadastro.", model.Email);
+                    }
                 }
 
                 var usuario = new Usuario
@@ -125,7 +138,7 @@ namespace MarmoreGranito.API.Controllers
                     Senha = PasswordHashService.HashPassword(model.Senha),
                     Telefone = model.Telefone,
                     Cargo = model.Cargo,
-                    DataCriacao = DateTime.UtcNow,
+                    DataCadastro = DateTime.UtcNow,
                     DataUltimaAtualizacao = DateTime.UtcNow,
                     Ativo = true
                 };
@@ -144,7 +157,7 @@ namespace MarmoreGranito.API.Controllers
                     CPF = usuario.CPF,
                     Telefone = usuario.Telefone,
                     Cargo = usuario.Cargo,
-                    DataCriacao = usuario.DataCriacao,
+                    DataCadastro = usuario.DataCadastro,
                     DataUltimaAtualizacao = usuario.DataUltimaAtualizacao,
                     Ativo = usuario.Ativo
                 };
@@ -205,7 +218,7 @@ namespace MarmoreGranito.API.Controllers
                     CPF = usuarioExistente.CPF,
                     Telefone = usuarioExistente.Telefone,
                     Cargo = usuarioExistente.Cargo,
-                    DataCriacao = usuarioExistente.DataCriacao,
+                    DataCadastro = usuarioExistente.DataCadastro,
                     DataUltimaAtualizacao = usuarioExistente.DataUltimaAtualizacao,
                     Ativo = usuarioExistente.Ativo
                 };

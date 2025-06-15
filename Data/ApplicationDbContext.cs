@@ -26,7 +26,8 @@ namespace MarmoreGranito.API.Data
                 entity.Property(e => e.Nome).HasColumnName("nome");
                 entity.Property(e => e.Email).HasColumnName("email");
                 entity.Property(e => e.Senha).HasColumnName("senha");
-                entity.Property(e => e.DataCriacao).HasColumnName("data_criacao");
+                entity.Property(e => e.Cargo).HasColumnName("cargo");
+                entity.Property(e => e.DataCadastro).HasColumnName("data_cadastro");
                 entity.Property(e => e.Ativo).HasColumnName("ativo");
             });
 
@@ -36,12 +37,15 @@ namespace MarmoreGranito.API.Data
                 entity.Property(e => e.Id).HasColumnName("id");
                 entity.Property(e => e.Codigo).HasColumnName("codigo");
                 entity.Property(e => e.PedreiraOrigem).HasColumnName("pedreira_origem");
-                entity.Property(e => e.MetragemM3).HasColumnName("metragem_m3");
+                entity.Property(e => e.Largura).HasColumnName("largura");
+                entity.Property(e => e.Altura).HasColumnName("altura");
+                entity.Property(e => e.Comprimento).HasColumnName("comprimento");
                 entity.Property(e => e.TipoMaterial).HasColumnName("tipo_material");
                 entity.Property(e => e.ValorCompra).HasColumnName("valor_compra");
                 entity.Property(e => e.NotaFiscalEntrada).HasColumnName("nota_fiscal_entrada");
                 entity.Property(e => e.DataCadastro).HasColumnName("data_cadastro");
                 entity.Property(e => e.Disponivel).HasColumnName("disponivel");
+                entity.Ignore(e => e.MetragemM3);
             });
 
             modelBuilder.Entity<Chapa>(entity =>
@@ -65,7 +69,7 @@ namespace MarmoreGranito.API.Data
 
             modelBuilder.Entity<ProcessoSerragem>(entity =>
             {
-                entity.ToTable("processo_serragem");
+                entity.ToTable("processos_serragem");
                 entity.Property(e => e.Id).HasColumnName("id");
                 entity.Property(e => e.BlocoId).HasColumnName("bloco_id");
                 entity.Property(e => e.DataInicio).HasColumnName("data_inicio");

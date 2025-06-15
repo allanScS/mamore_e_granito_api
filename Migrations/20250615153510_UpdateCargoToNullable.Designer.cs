@@ -3,6 +3,7 @@ using System;
 using MarmoreGranito.API.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace MarmoreGranito.API.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250615153510_UpdateCargoToNullable")]
+    partial class UpdateCargoToNullable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -31,22 +34,11 @@ namespace MarmoreGranito.API.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<decimal>("Altura")
-                        .HasColumnType("numeric")
-                        .HasColumnName("altura");
-
-                    b.Property<bool>("Cerrado")
-                        .HasColumnType("boolean");
-
                     b.Property<string>("Codigo")
                         .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("character varying(50)")
                         .HasColumnName("codigo");
-
-                    b.Property<decimal>("Comprimento")
-                        .HasColumnType("numeric")
-                        .HasColumnName("comprimento");
 
                     b.Property<DateTime>("DataCadastro")
                         .HasColumnType("timestamp with time zone")
@@ -56,9 +48,9 @@ namespace MarmoreGranito.API.Migrations
                         .HasColumnType("boolean")
                         .HasColumnName("disponivel");
 
-                    b.Property<decimal>("Largura")
+                    b.Property<decimal>("MetragemM3")
                         .HasColumnType("numeric")
-                        .HasColumnName("largura");
+                        .HasColumnName("metragem_m3");
 
                     b.Property<string>("NotaFiscalEntrada")
                         .IsRequired()
@@ -159,7 +151,6 @@ namespace MarmoreGranito.API.Migrations
                         .HasColumnName("data_inicio");
 
                     b.Property<string>("Observacoes")
-                        .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("observacoes");
 
@@ -168,7 +159,6 @@ namespace MarmoreGranito.API.Migrations
                         .HasColumnName("quantidade_chapas");
 
                     b.Property<string>("Status")
-                        .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("status");
 
@@ -176,7 +166,7 @@ namespace MarmoreGranito.API.Migrations
 
                     b.HasIndex("BlocoId");
 
-                    b.ToTable("processos_serragem", (string)null);
+                    b.ToTable("processo_serragem", (string)null);
                 });
 
             modelBuilder.Entity("MarmoreGranito.API.Models.Usuario", b =>
@@ -199,12 +189,11 @@ namespace MarmoreGranito.API.Migrations
 
                     b.Property<string>("Cargo")
                         .HasMaxLength(50)
-                        .HasColumnType("character varying(50)")
-                        .HasColumnName("cargo");
+                        .HasColumnType("character varying(50)");
 
-                    b.Property<DateTime>("DataCadastro")
+                    b.Property<DateTime>("DataCriacao")
                         .HasColumnType("timestamp with time zone")
-                        .HasColumnName("data_cadastro");
+                        .HasColumnName("data_criacao");
 
                     b.Property<DateTime?>("DataUltimaAtualizacao")
                         .HasColumnType("timestamp with time zone");

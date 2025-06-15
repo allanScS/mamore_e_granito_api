@@ -1,5 +1,6 @@
 using System;
 using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 
 namespace MarmoreGranito.API.Models
 {
@@ -17,9 +18,10 @@ namespace MarmoreGranito.API.Models
         [Range(1, int.MaxValue, ErrorMessage = "A quantidade de chapas deve ser maior que zero")]
         public int QuantidadeChapas { get; set; }
 
-        public string Observacoes { get; set; }
-        public string Status { get; set; }
+        public string Observacoes { get; set; } = string.Empty;
+        public string Status { get; set; } = string.Empty;
 
-        public virtual Bloco Bloco { get; set; }
+        [JsonIgnore]
+        public virtual Bloco Bloco { get; set; } = null!;
     }
 } 
