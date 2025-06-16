@@ -35,6 +35,10 @@ namespace MarmoreGranito.API.Models
         public DateTime DataCadastro { get; set; }
         public bool Disponivel { get; set; }
 
+        [Required(ErrorMessage = "A quantidade em estoque é obrigatória")]
+        [Range(0, int.MaxValue, ErrorMessage = "A quantidade em estoque deve ser maior ou igual a zero")]
+        public int QuantidadeEstoque { get; set; }
+
         [JsonIgnore]
         public virtual Bloco? Bloco { get; set; }
 
@@ -69,7 +73,46 @@ namespace MarmoreGranito.API.Models
 
         public bool Disponivel { get; set; } = true;
 
+        [Required(ErrorMessage = "A quantidade em estoque é obrigatória")]
+        [Range(0, int.MaxValue, ErrorMessage = "A quantidade em estoque deve ser maior ou igual a zero")]
+        public int QuantidadeEstoque { get; set; }
+
         [NotMapped]
         public decimal Medidas => Comprimento * Largura * Espessura;
+    }
+
+    public class ChapaResponseModel
+    {
+        public int Id { get; set; }
+        public int BlocoId { get; set; }
+        public string BlocoCodigo { get; set; } = string.Empty;
+        public string TipoMaterial { get; set; } = string.Empty;
+        public decimal Comprimento { get; set; }
+        public decimal Largura { get; set; }
+        public decimal Espessura { get; set; }
+        public decimal ValorUnitario { get; set; }
+        public DateTime DataCadastro { get; set; }
+        public bool Disponivel { get; set; }
+        public int QuantidadeEstoque { get; set; }
+        public decimal Medidas { get; set; }
+
+        public static ChapaResponseModel FromChapa(Chapa chapa)
+        {
+            return new ChapaResponseModel
+            {
+                Id = chapa.Id,
+                BlocoId = chapa.BlocoId,
+                BlocoCodigo = chapa.Bloco?.Codigo ?? string.Empty,
+                TipoMaterial = chapa.TipoMaterial,
+                Comprimento = chapa.Comprimento,
+                Largura = chapa.Largura,
+                Espessura = chapa.Espessura,
+                ValorUnitario = chapa.ValorUnitario,
+                DataCadastro = chapa.DataCadastro,
+                Disponivel = chapa.Disponivel,
+                QuantidadeEstoque = chapa.QuantidadeEstoque,
+                Medidas = chapa.Medidas
+            };
+        }
     }
 } 

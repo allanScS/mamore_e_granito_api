@@ -30,9 +30,10 @@ namespace MarmoreGranito.API.Controllers
         {
             try
             {
-                _logger.LogInformation("Buscando todos os blocos disponíveis");
+                _logger.LogInformation("Buscando todos os blocos ativos");
                 return await _context.Blocos
                     .Where(b => b.Disponivel)
+                    .OrderByDescending(b => b.DataCadastro)
                     .ToListAsync();
             }
             catch (Exception ex)
@@ -42,20 +43,39 @@ namespace MarmoreGranito.API.Controllers
             }
         }
 
-        [HttpGet("nao-cerrados")]
-        public async Task<ActionResult<IEnumerable<Bloco>>> GetBlocosNaoCerrados()
+        [HttpGet("disponiveis-para-serragem")]
+        public async Task<ActionResult<IEnumerable<Bloco>>> GetBlocosDisponiveisParaSerragem()
         {
             try
             {
-                _logger.LogInformation("Buscando todos os blocos disponíveis não cerrados");
+                _logger.LogInformation("Buscando blocos disponíveis para serragem");
                 return await _context.Blocos
                     .Where(b => b.Disponivel && !b.Cerrado)
+                    .OrderByDescending(b => b.DataCadastro)
                     .ToListAsync();
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erro ao buscar blocos não cerrados");
-                return StatusCode(500, new { message = $"Erro ao buscar blocos não cerrados: {ex.Message}" });
+                _logger.LogError(ex, "Erro ao buscar blocos disponíveis para serragem");
+                return StatusCode(500, new { message = $"Erro ao buscar blocos disponíveis para serragem: {ex.Message}" });
+            }
+        }
+
+        [HttpGet("cerrados")]
+        public async Task<ActionResult<IEnumerable<Bloco>>> GetBlocosCerrados()
+        {
+            try
+            {
+                _logger.LogInformation("Buscando blocos cerrados");
+                return await _context.Blocos
+                    .Where(b => b.Disponivel && b.Cerrado)
+                    .OrderByDescending(b => b.DataCadastro)
+                    .ToListAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erro ao buscar blocos cerrados");
+                return StatusCode(500, new { message = $"Erro ao buscar blocos cerrados: {ex.Message}" });
             }
         }
 

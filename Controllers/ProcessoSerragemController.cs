@@ -68,35 +68,57 @@ namespace MarmoreGranito.API.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult<ProcessoSerragem>> PostProcesso(ProcessoSerragem processo)
+        public async Task<ActionResult<ProcessoSerragem>> PostProcesso(ProcessoSerragemRequest request)
         {
             try
             {
-                var bloco = await _context.Blocos.FindAsync(processo.BlocoId);
+                var bloco = await _context.Blocos.FindAsync(request.BlocoId);
                 if (bloco == null)
                 {
-                    _logger.LogWarning($"Tentativa de criar processo de serragem para bloco inexistente ID {processo.BlocoId}");
+                    _logger.LogWarning($"Tentativa de criar processo de serragem para bloco inexistente ID {request.BlocoId}");
                     return BadRequest(new { message = "Bloco não encontrado" });
                 }
 
                 if (!bloco.Disponivel)
                 {
-                    _logger.LogWarning($"Tentativa de criar processo de serragem para bloco indisponível ID {processo.BlocoId}");
+                    _logger.LogWarning($"Tentativa de criar processo de serragem para bloco indisponível ID {request.BlocoId}");
                     return BadRequest(new { message = "Bloco não está disponível" });
                 }
 
                 if (bloco.Cerrado)
                 {
-                    _logger.LogWarning($"Tentativa de criar processo de serragem para bloco já cerrado ID {processo.BlocoId}");
+                    _logger.LogWarning($"Tentativa de criar processo de serragem para bloco já cerrado ID {request.BlocoId}");
                     return BadRequest(new { message = "Bloco já foi cerrado" });
                 }
 
-                processo.DataInicio = DateTime.UtcNow;
-                processo.Status = "Em Andamento";
+                var processo = new ProcessoSerragem
+                {
+                    BlocoId = request.BlocoId,
+                    DataInicio = DateTime.UtcNow,
+                    QuantidadeChapas = request.QuantidadeChapas,
+                    Observacoes = request.Observacoes ?? string.Empty
+                };
 
-                // Marca o bloco como cerrado
+                // Marca o bloco como cerrado e indisponível
                 bloco.Cerrado = true;
+                // Mantém o bloco disponível para aparecer na listagem
+                bloco.Disponivel = true;
 
+                // Criar as chapas com as medidas especificadas
+                var chapa = new Chapa
+                {
+                    BlocoId = bloco.Id,
+                    TipoMaterial = bloco.TipoMaterial,
+                    Comprimento = request.Comprimento,
+                    Largura = request.Largura,
+                    Espessura = request.Espessura,
+                    ValorUnitario = bloco.ValorCompra / request.QuantidadeChapas,
+                    DataCadastro = DateTime.UtcNow,
+                    Disponivel = true,
+                    QuantidadeEstoque = request.QuantidadeChapas
+                };
+
+                _context.Chapas.Add(chapa);
                 _context.ProcessosSerragem.Add(processo);
                 await _context.SaveChangesAsync();
 
@@ -128,47 +150,8 @@ namespace MarmoreGranito.API.Controllers
                     return NotFound(new { message = "Processo de serragem não encontrado" });
                 }
 
-                if (processo.Status == "Concluído" && processoExistente.Status != "Concluído")
-                {
-                    // Gerar chapas automaticamente
-                    var bloco = await _context.Blocos.FindAsync(processoExistente.BlocoId);
-                    if (bloco == null)
-                    {
-                        _logger.LogWarning($"Bloco não encontrado ao concluir processo de serragem: {processoExistente.BlocoId}");
-                        return BadRequest(new { message = "Bloco não encontrado" });
-                    }
-
-                    // Calcular dimensões das chapas baseado no bloco
-                    decimal espessura = 0.02m; // 2cm padrão
-                    decimal comprimento = (decimal)Math.Cbrt((double)(bloco.MetragemM3 * 2));
-                    decimal largura = comprimento;
-
-                    // Criar as chapas
-                    for (int i = 0; i < processo.QuantidadeChapas; i++)
-                    {
-                        var chapa = new Chapa
-                        {
-                            BlocoId = bloco.Id,
-                            TipoMaterial = bloco.TipoMaterial,
-                            Comprimento = comprimento,
-                            Largura = largura,
-                            Espessura = espessura,
-                            ValorUnitario = bloco.ValorCompra / processo.QuantidadeChapas,
-                            DataCadastro = DateTime.UtcNow,
-                            Disponivel = true
-                        };
-
-                        _context.Chapas.Add(chapa);
-                    }
-
-                    // Atualizar status do bloco
-                    bloco.Disponivel = false;
-                }
-
                 processoExistente.QuantidadeChapas = processo.QuantidadeChapas;
                 processoExistente.Observacoes = processo.Observacoes;
-                processoExistente.Status = processo.Status;
-                processoExistente.DataConclusao = processo.Status == "Concluído" ? DateTime.UtcNow : null;
 
                 await _context.SaveChangesAsync();
 
@@ -194,17 +177,12 @@ namespace MarmoreGranito.API.Controllers
                     return NotFound(new { message = "Processo de serragem não encontrado" });
                 }
 
-                if (processo.Status == "Concluído")
-                {
-                    _logger.LogWarning($"Tentativa de excluir processo de serragem concluído: {id}");
-                    return BadRequest(new { message = "Não é possível excluir um processo concluído" });
-                }
-
                 // Desmarca o bloco como cerrado ao excluir o processo
                 var bloco = await _context.Blocos.FindAsync(processo.BlocoId);
                 if (bloco != null)
                 {
                     bloco.Cerrado = false;
+                    bloco.Disponivel = true;
                 }
 
                 _context.ProcessosSerragem.Remove(processo);

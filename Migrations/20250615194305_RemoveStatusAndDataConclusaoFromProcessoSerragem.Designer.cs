@@ -3,6 +3,7 @@ using System;
 using MarmoreGranito.API.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace MarmoreGranito.API.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250615194305_RemoveStatusAndDataConclusaoFromProcessoSerragem")]
+    partial class RemoveStatusAndDataConclusaoFromProcessoSerragem
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -120,10 +123,6 @@ namespace MarmoreGranito.API.Migrations
                     b.Property<decimal>("Largura")
                         .HasColumnType("numeric")
                         .HasColumnName("largura");
-
-                    b.Property<int>("QuantidadeEstoque")
-                        .HasColumnType("integer")
-                        .HasColumnName("quantidade_estoque");
 
                     b.Property<string>("TipoMaterial")
                         .IsRequired()

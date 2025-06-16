@@ -12,14 +12,12 @@ namespace MarmoreGranito.API.Models
         public int BlocoId { get; set; }
 
         public DateTime DataInicio { get; set; }
-        public DateTime? DataConclusao { get; set; }
 
         [Required(ErrorMessage = "A quantidade de chapas é obrigatória")]
         [Range(1, int.MaxValue, ErrorMessage = "A quantidade de chapas deve ser maior que zero")]
         public int QuantidadeChapas { get; set; }
 
         public string Observacoes { get; set; } = string.Empty;
-        public string Status { get; set; } = string.Empty;
 
         [JsonIgnore]
         public virtual Bloco Bloco { get; set; } = null!;

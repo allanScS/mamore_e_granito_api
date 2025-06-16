@@ -26,15 +26,17 @@ namespace MarmoreGranito.API.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Chapa>>> GetChapas()
+        public async Task<ActionResult<IEnumerable<ChapaResponseModel>>> GetChapas()
         {
             try
             {
                 _logger.LogInformation("Buscando todas as chapas");
-                return await _context.Chapas
+                var chapas = await _context.Chapas
                     .Include(c => c.Bloco)
                     .Where(c => c.Disponivel)
                     .ToListAsync();
+
+                return chapas.Select(ChapaResponseModel.FromChapa).ToList();
             }
             catch (Exception ex)
             {
@@ -44,7 +46,7 @@ namespace MarmoreGranito.API.Controllers
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<Chapa>> GetChapa(int id)
+        public async Task<ActionResult<ChapaResponseModel>> GetChapa(int id)
         {
             try
             {
@@ -59,7 +61,7 @@ namespace MarmoreGranito.API.Controllers
                     return NotFound(new { message = "Chapa não encontrada" });
                 }
 
-                return chapa;
+                return ChapaResponseModel.FromChapa(chapa);
             }
             catch (Exception ex)
             {
@@ -95,7 +97,8 @@ namespace MarmoreGranito.API.Controllers
                     Espessura = model.Espessura,
                     ValorUnitario = model.ValorUnitario,
                     DataCadastro = DateTime.UtcNow,
-                    Disponivel = model.Disponivel
+                    Disponivel = model.Disponivel,
+                    QuantidadeEstoque = model.QuantidadeEstoque
                 };
 
                 _context.Chapas.Add(chapa);
@@ -143,6 +146,7 @@ namespace MarmoreGranito.API.Controllers
                 chapaExistente.Espessura = model.Espessura;
                 chapaExistente.ValorUnitario = model.ValorUnitario;
                 chapaExistente.Disponivel = model.Disponivel;
+                chapaExistente.QuantidadeEstoque = model.QuantidadeEstoque;
 
                 await _context.SaveChangesAsync();
 
