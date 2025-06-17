@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("MarmoreGranito.API")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+21fbc1813fbffd9502f28c0792875a6c2f8e7e74")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+eb715f1a928a9166b948cc5c496272b349b19f13")]
 [assembly: System.Reflection.AssemblyProductAttribute("MarmoreGranito.API")]
 [assembly: System.Reflection.AssemblyTitleAttribute("MarmoreGranito.API")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
